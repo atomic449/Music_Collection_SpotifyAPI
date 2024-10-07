@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet "/>
+    <title>Home</title>
+    <style>
+        body
+        {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="panel well" style="width: 350px; padding: 25px; text-align: center">
+        <h1 style="margin-bottom: 35px">Home page</h1>
+        <div>
+            <button class="btn btn-lg btn-primary" style="margin-bottom: 15px" onclick="window.location.href='/my-collections'">My Collections</button>
+        </div>
+        <div>
+            <button class="btn btn-lg btn-success" style="margin-bottom: 15px" onclick="createCollection()">Create collection</button>
+        </div>
+        <div>
+            <button class="btn btn-lg btn-danger"  onclick="logout()">Log out</button>
+        </div>
+    </div>
+    <script>
+        async function createCollection() {
+            console.log(`Entering createCollection function`);
+
+            const response = await fetch('/create-collection', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            if (response.ok) {
+                const createdCollection = await response.json();
+                console.log('Created Collection:', createdCollection);
+
+                window.location.href = `/create-collection?id=${createdCollection.Id}`;
+            } else {
+                console.error('Failed to create collection');
+            }
+        }
+        async function logout() {
+            try {
+                const response = await fetch('/logout');
+                if (response.ok) {
+                    alert('Logged out successfully');
+                    window.location.href = '/login';
+                } else {
+                    alert('Logout failed');
+                }
+            } catch (error) {
+                console.error('Error during logout:', error);
+            }
+        }
+
+    </script>
+</body>
+
+</html>

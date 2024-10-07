@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Collection</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet "/>
+    <style>
+        .my-item
+        {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px;
+            border: 1px solid gray;
+        }
+        .my-row
+        {
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center">Create Collection Page</h2>
+        
+        <div class="text-center">
+            <button class="btn btn-primary" onclick="window.location.href='/home'">Home</button>
+            <button class="btn btn-primary" onclick="window.location.href='/my-collections'">My Collections</button>
+        </div>
+        
+        <hr>
+        
+        <div class="text-center">
+            <h1><%= collectionName %></h1>
+            <p><%= collectionDescription %></p>
+        </div>
+        
+        <div class="text-center">
+            <a href="/edit-collection/<%= collectionId %>">
+                <button class="btn btn-warning">Edit</button>
+            </a>
+            <form action="/delete-collection" method="POST" style="display:inline;" onsubmit="return confirmDelete();">
+                <input type="hidden" name="collectionId" value="<%= collectionId %>">
+                <button class="btn btn-danger" type="submit">Delete</button>
+            </form>            
+        </div>
+        
+        <hr>
+        
+        <div class="text-center">
+            <a href="/add-song?collectionId=<%= collectionId %>">
+                <button class="btn btn-success">Add Song</button>
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <hr>
+        <div class="song-list">
+            <% if (songs && songs.length > 0) { %>
+                <ul>
+                    <% songs.forEach(song => { %>
+                        <li class="my-item">
+                            <div class="my-row">
+                                <img src="<%= song.albumCover %>" alt="<%= song.name %> album cover" style="width: 100px;">
+                                <div>
+                                    <p>Song: <%= song.name %></p>
+                                    <p>Artist: <%= song.artist %></p>
+                                    <p>Album: <%= song.album %></p>
+                                </div>
+                            </div>
+                            <form action="/delete-song" method="POST" style="display: inline;">
+                                <input type="hidden" name="spotifyId" value="<%= song.id %>">
+                                <input type="hidden" name="collectionId" value="<%= collectionId %>">
+                                <button class="btn btn-danger" type="submit">Delete</button>
+                            </form>
+                        </li>
+                    <% }) %>
+                </ul>
+            <% } else { %>
+                <p>No songs added to this collection yet</p>
+            <% } %>
+        </div>
+    </div>
+
+    <script>
+        function confirmDelete() {
+            return confirm("Are you sure you want to delete this collection?");
+        }
+    </script>
+    
+</body>
+</html>

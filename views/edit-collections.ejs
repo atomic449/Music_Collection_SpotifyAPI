@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet "/>
+    <title>Edit Collection</title>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center">Edit Collection</h2>
+        <form id="edit-collection-form" class="form-horizontal">
+            <div class="form-group">
+                <label for="name" class="col-sm-2 control-label">New Name</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="name" name="name" placeholder="New Name" value="<%= collectionName %>" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="description" class="col-sm-2 control-label">New Description</label>
+                <div class="col-sm-10">
+                    <textarea class="form-control" id="description" name="description" placeholder="New Description" required><%= collectionDescription %></textarea>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Type</label>
+                <div class="col-sm-10">
+                    <label class="radio-inline">
+                        <input type="radio" name="type" value="song" <%= collectionType === 'song' ? 'checked' : '' %> required> Song Collection
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="type" value="album" <%= collectionType === 'album' ? 'checked' : '' %> required> Album Collection
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <script>
+        document.getElementById('edit-collection-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const response = await fetch(`/edit-collection/<%= collectionId %>`, {
+                method: 'POST',
+                body: new URLSearchParams(formData)
+            });
+    
+            if (response.ok) {
+                const result = await response.json();
+                alert(result.message);
+                console.log('OK');
+            } else {
+                alert('Error updating collection');
+            }
+        });
+    </script>
+</body>
+</html>

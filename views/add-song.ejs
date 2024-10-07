@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet "/>
+
+    <title>Spotify Song Search</title>
+    <style>
+        .album-cover {
+            width: 50px;
+            height: 50px;
+            margin-right: 10px;
+        }
+        li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px; 
+            width: 40%;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px grey;
+        }
+    </style>
+</head>
+<body>
+    <h1>Search for Songs</h1>
+    <input type="text" id="song-input" placeholder="Enter song name">
+    <button id="search-button">Search</button>
+
+    <ul id="song-list"></ul>
+    <div id="loading-message" style="display: none;">Loading...</div>
+    <button id="more-button" style="display: none;">More</button>
+    <script>
+        let offset = 0;
+        const limit = 50;
+
+        document.getElementById('search-button').addEventListener('click', async () => {
+            const query = document.getElementById('song-input').value;
+            offset = 0;
+
+            const songList = document.getElementById('song-list');
+            songList.innerHTML = '';
+
+            document.getElementById('loading-message').style.display = 'block';
+
+            const songs = await fetchSongs(query, offset, limit);
+            document.getElementById('loading-message').style.display = 'none';
+
+            displaySongs(songs);
+            if (songs.length === limit) {
+                document.getElementById('more-button').style.display = 'block';
+            } else {
+                document.getElementById('more-button').style.display = 'none';
+            }
+        });
+
+        document.getElementById('more-button').addEventListener('click', async () => {
+            const query = document.getElementById('song-input').value;
+            const loadingMessage = document.getElementById('loading-message');
+            
+            loadingMessage.style.display = 'block'; 
+
+            offset += limit;
+            const songs = await fetchSongs(query, offset, limit);
+
+            displaySongs(songs);
+            loadingMessage.style.display = 'none';
+
+            if (songs.length === 0) {
+                document.getElementById('more-button').style.display = 'none';
+            }
+        });
+
+        document.getElementById('song-input').addEventListener('keydown', async (event) => {
+        if (event.key === 'Enter') {
+            const query = document.getElementById('song-input').value;
+            offset = 0;
+
+            const songList = document.getElementById('song-list');
+            songList.innerHTML = '';
+            document.getElementById('more-button').style.display = 'none';
+            const loadingMessage = document.getElementById('loading-message');
+            loadingMessage.style.display = 'block';
+
+            const songs = await fetchSongs(query, offset, limit);
+            displaySongs(songs);
+            loadingMessage.style.display = 'none';
+            if (songs.length > 0) {
+                document.getElementById('more-button').style.display = 'block';
+            }
+        }
+    });
+        const fetchSongs = async (query, offset, limit) => {
+            const response = await fetch('/search', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query, offset, limit })
+            });
+            return response.json();
+        };
+
+        const displaySongs = (songs) => {
+        const songList = document.getElementById('song-list');
+
+        songs.forEach(song => {
+        const li = document.createElement('li');
+
+        const songDiv = document.createElement('div');
+        songDiv.className = 'song-info';
+
+        const img = document.createElement('img');
+        img.src = song.albumCover;
+        img.alt = `${song.name} album cover`;
+        img.className = 'album-cover';
+
+        const infoText = document.createElement('span');
+        infoText.textContent = `Song Name: ${song.name}, Artist: ${song.artist}`;
+
+        songDiv.appendChild(img);
+        songDiv.appendChild(infoText);
+
+        const plusButton = document.createElement('button');
+        plusButton.textContent = 'Add';
+
+        plusButton.addEventListener('click', async () => {
+        const collectionId = new URLSearchParams(window.location.search).get('collectionId');
+        try {
+            const response = await fetch('/add-song', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ spotifyId: song.id, collectionId })
+            });
+
+            const result = await response.json();
+            console.log(result);
+
+            alert('Song added successfully!');
+        
+        } 
+        catch (error) {
+            console.error('Error adding song:', error);
+            alert('Failed to add the song. Please try again.');
+        }
+    });
+
+        li.appendChild(songDiv);
+        li.appendChild(plusButton);
+        songList.appendChild(li);
+    });
+};
+
+    </script>
+</body>
+
+</html>
